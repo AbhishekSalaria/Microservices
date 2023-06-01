@@ -2,6 +2,8 @@ package com.currencyconversionmicroservice.currencyconversionmicroservice.servic
 
 import com.currencyconversionmicroservice.currencyconversionmicroservice.model.CurrencyConversion;
 import com.currencyconversionmicroservice.currencyconversionmicroservice.proxy.CurrencyExchangeProxy;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,8 @@ public class CurrencyConversionService {
     @Autowired
     CurrencyExchangeProxy currencyExchangeProxy;
 
+    @CircuitBreaker(name= "currencyConversionFallback",fallbackMethod = "currencyConversionFallback")
+    @Bulkhead(name= "currencyConversionFallback")
     public CurrencyConversion currencyConversion(String from, String to, int quantity) {
 
         CurrencyConversion currencyConversion = currencyExchangeProxy.getCurrencyExchangeValues(from,to);
@@ -19,5 +23,9 @@ public class CurrencyConversionService {
                                       currencyConversion.getConversionMultiple(),quantity,
                                       currencyConversion.getConversionMultiple() * quantity,
                                       currencyConversion.getEnvironment());
+    }
+
+    public CurrencyConversion currencyConversionFallback(Exception ex) {
+        return new CurrencyConversion(-1,"-1","-1",-1,-1,-1,"-1");
     }
 }

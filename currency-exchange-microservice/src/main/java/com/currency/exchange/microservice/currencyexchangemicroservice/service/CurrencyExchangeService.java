@@ -16,12 +16,7 @@ public class CurrencyExchangeService {
     private Environment environment;
     public CurrencyExchange getCurrencyExchangeValues(String from, String to) {
 
-
         CurrencyExchange byFromAndTo = repository.findByFromAndTo(from, to);
-
-        if(byFromAndTo == null) {
-            return new CurrencyExchange(-1,from,to,-1,"-1");
-        }
 
         String port = environment.getProperty("local.server.port");
         byFromAndTo.setEnvironment(port);
